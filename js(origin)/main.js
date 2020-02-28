@@ -18,6 +18,8 @@ var scores=0;
 var kill=document.getElementById("sound-kill");
     //游戏结束音效
 var gameover=document.getElementById("sound-gameover");
+/**游戏结束第一次调用 */
+var first=1;
 
     //检测是否为PC浏览
     var sUserAgent = navigator.userAgent.toLowerCase();
@@ -414,10 +416,9 @@ function start(){
             //判断碰撞本方飞机
             if(enemys[j].planisdie==false){
                 if(enemys[j].imagenode.offsetLeft+enemys[j].plansizeX>=selfplan.imagenode.offsetLeft&&enemys[j].imagenode.offsetLeft<=selfplan.imagenode.offsetLeft+selfplan.plansizeX){
-                  if(enemys[j].imagenode.offsetTop+enemys[j].plansizeY>=selfplan.imagenode.offsetTop+40&&enemys[j].imagenode.offsetTop<=selfplan.imagenode.offsetTop-20+selfplan.plansizeY){
+                  if(enemys[j].imagenode.offsetTop+enemys[j].plansizeY>=selfplan.imagenode.offsetTop+40&&enemys[j].imagenode.offsetTop<=selfplan.imagenode.offsetTop-20+selfplan.plansizeY&&first){
                       //碰撞本方飞机，游戏结束，统计分数
                       selfplan.imagenode.src="image/本方飞机爆炸.gif";
-
                       this.gameover.play();
 
                       enddiv.style.display="block";
@@ -448,6 +449,7 @@ function start(){
                       }
                       
                       clearInterval(set);
+                      first=0;
                   }
                 }
                 //判断子弹与敌机碰撞
