@@ -143,14 +143,44 @@ function ourplan(X,Y){
 var dW=$('body').width();;
 var dH = $('body').height();
 (function(){
-    /**定时循环获取获取现在的页面高度 */
+    /**定时循环获取获取现在的页面高度和宽度 */
     function getnowdH()
     {
         dH=$('body').height();
+        dW=$('body').width();
         setTimeout(getnowdH,1000);
     }
     getnowdH();
 })();
+/**获取最高分 cookies 
+ * @returns {number} 最高分
+*/
+function getc()
+{
+    var c=decodeURIComponent(document.cookie);
+    var ca=c.split(';');
+    for(var i=0;i<<ca.length;i++)
+    {
+        var b=ca[i];
+        while (b.charAt(0) == ' '){
+            b=b.substring(1);
+        }
+        if(b.indexOf('score=')==0)
+        {
+            return Base64.decode(b.substring(6,b.length))-1+1;
+        }
+    }
+    return 0;
+}
+/**设置最高分 cookies
+ * @param {number} s 最高分
+ */
+function setc(s)
+{
+    var d=new Date();
+    d.setTime(d.getTime()+365*24*60*60*1000);
+    document.cookie="score="+Base64.encode(s+"")+";expires="+d.toUTCString()+";";
+}
 var selfplan=new ourplan(120,458);
 //移动事件
 var ourPlan=document.getElementById('ourplan');
@@ -391,7 +421,23 @@ function start(){
                       this.gameover.play();
 
                       enddiv.style.display="block";
+                      var hs=getc();
+                      var nhs=0;
+                      if(scores>hs)
+                        {
+                          hs=scores;
+                          nhs=1;
+                        }
+                      setc(hs);
                       planscore.innerHTML=scores;
+                      if(hs>0&&nhs==0)
+                      {
+                          planscore.innerHTML=planscore.innerHTML+"<br/>历史最高分为"+hs;
+                      }
+                      else
+                      {
+                          planscore.innerHTML=planscore.innerHTML+"<br/>新纪录！"
+                      }
                       if(document.removeEventListener){
                           mainDiv.removeEventListener("touchstart",yidong,true);
                           bodyobj.removeEventListener("touchstart",bianjie,true);
