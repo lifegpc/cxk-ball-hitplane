@@ -159,7 +159,7 @@ function getc()
 {
     var c=decodeURIComponent(document.cookie);
     var ca=c.split(';');
-    for(var i=0;i<<ca.length;i++)
+    for(var i=0;i<ca.length;i++)
     {
         var b=ca[i];
         while (b.charAt(0) == ' '){
