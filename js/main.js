@@ -14,10 +14,28 @@ var enddiv=document.getElementById("enddiv");
 var planscore=document.getElementById("planscore");
     //初始化分数
 var scores=0;
+/**@typedef {{first_name: string, id: number, is_bot: boolean, last_name: string, username: string, language_code: string}} TgUser
+ * @typedef {{position: number, score: number, user: TgUser}} TgScore
+ * @typedef {{ok: boolean, result: Array<TgScore>}} TgHighScore
+ */
+/**最高分数*/
+var highscores = 0;
     //杀死敌方音效
 var kill=document.getElementById("sound-kill");
     //游戏结束音效
 var gameover=document.getElementById("sound-gameover");
+var url = new URL(window.location.href);
+/**@type {number} Telegram user id*/
+var uid = undefined;
+if (url.searchParams.get('uid') != null) {
+    uid = Number.parseInt(url.searchParams.get('uid'));
+    if (uid != uid) uid = undefined;
+}
+/**@type {string} Telegram inline message id*/
+var mid = undefined;
+if (url.searchParams.get('mid') != null) {
+    mid = url.searchParams.get('mid');
+}
 
     //检测是否为PC浏览
     var sUserAgent = navigator.userAgent.toLowerCase();
@@ -391,7 +409,79 @@ function start(){
                       this.gameover.play();
 
                       enddiv.style.display="block";
-                      planscore.innerHTML=scores;
+                      if (highscores < scores) highscores = scores;
+                      var scoret = "%s\n最高分为%s。";
+                      scoret = scoret.replace("%s", scores).replace("%s", highscores);
+                      if (uid != undefined && mid != undefined) {
+                          scoret = scoret + "\n正在上传分数并更新排行榜......"
+                          $.getJSON("/sendScore", {"game": "cxk_ball_hitplane", "uid": uid, "score": scores, "mid": mid}, (e, s)=>{
+                              if (s != "success") {
+                                  planscore.innerText = "上传分数失败。"
+                                  return;
+                              }
+                              $.getJSON('/getGameHighScores', {"game": "cxk_ball_hitplane", "uid": uid, "mid": mid}, (e, s) => {
+                                if (s != "success") {
+                                    planscore.innerText = "更新排行榜失败。"
+                                    return;
+                                }
+                                /**@type {TgHighScore}*/
+                                var r = e;
+                                var myposition = -1;
+                                var prevscore = -1;
+                                var px = -1;
+                                var has = false;
+                                if (r.ok) {
+                                    var fposition = r.result.length ? r.result[0].position : -1;
+                                    r.result.forEach((te)=>{
+                                        if (te.user.id == uid) {
+                                            highscores = te.score;
+                                            myposition = te.position;
+                                            prevscore = px;
+                                            has = true;
+                                        }
+                                        px = te.score;
+                                    })
+                                    if (has) {
+                                        scoret = "%s\n最高分为 %s\n目前排名为第 %s 名%s"
+                                        var scoret3 = '，距离前一名玩家还差 %s(%s) 秒'
+                                        if (myposition > 1) {
+                                            scoret3 = scoret3.replace("%s", px - scores).replace("%s", px - highscores)
+                                        }
+                                        else scoret3 = ''
+                                        scoret = scoret.replace("%s", scores).replace("%s", highscores).replace("%s", myposition).replace('%s', scoret3);
+                                    }
+                                    var scoret2 = '';
+                                    var rel = r.result;
+                                    if (r.result.length > 5) {
+                                        var f = 0;
+                                        var l = r.result.length;
+                                        f = myposition - fposition - 2;
+                                        l = myposition - fposition + 3;
+                                        if (f < 0) {
+                                            f = 0;
+                                            l = 5;
+                                        }
+                                        else if (l > r.result.length) {
+                                            f = r.result.length - 5;
+                                            l = r.result.length;
+                                        }
+                                        rel = r.result.slice(f, l);
+                                    }
+                                    rel.forEach((te)=>{
+                                        var un = te.user.first_name;
+                                        if (te.user.last_name != undefined) un += (" " + te.user.last_name);
+                                        scoret2 += ('\n%s.%s %s'.replace('%s', te.position).replace('%s', un).replace('%s', te.score));
+                                    })
+                                    if (has) planscore.innerText = scoret + '\n' + scoret2;
+                                    else planscore.innerText = scores + '\n' + scoret2;
+                                }
+                                else {
+                                    planscore.innerText = "更新排行榜失败。";
+                                }
+                              })
+                          })
+                      }
+                      planscore.innerText = scoret;
                       if(document.removeEventListener){
                           mainDiv.removeEventListener("touchstart",yidong,true);
                           bodyobj.removeEventListener("touchstart",bianjie,true);
