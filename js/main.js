@@ -426,7 +426,7 @@ function start(){
                                 }
                                 /**@type {TgHighScore}*/
                                 var r = e;
-                                var myposition = -1;
+                                var myposition = 1;
                                 var prevscore = -1;
                                 var px = -1;
                                 var has = false;
