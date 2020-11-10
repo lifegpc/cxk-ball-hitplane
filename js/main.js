@@ -142,6 +142,15 @@ function ourplan(X,Y){
  */
 var dW=$('body').width();;
 var dH = $('body').height();
+(function(){
+    /**定时循环获取获取现在的页面高度 */
+    function getnowdH()
+    {
+        dH=$('body').height();
+        setTimeout(getnowdH,1000);
+    }
+    getnowdH();
+})();
 var selfplan=new ourplan(120,458);
 //移动事件
 var ourPlan=document.getElementById('ourplan');
