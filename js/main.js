@@ -445,7 +445,7 @@ function start(){
                                         scoret = "%s\n最高分为 %s\n目前排名为第 %s 名%s"
                                         var scoret3 = '，距离前一名玩家还差 %s(%s) 秒'
                                         if (myposition > 1) {
-                                            scoret3 = scoret3.replace("%s", px - scores).replace("%s", px - highscores)
+                                            scoret3 = scoret3.replace("%s", prevscore - scores).replace("%s", prevscore - highscores)
                                         }
                                         else scoret3 = ''
                                         scoret = scoret.replace("%s", scores).replace("%s", highscores).replace("%s", myposition).replace('%s', scoret3);
